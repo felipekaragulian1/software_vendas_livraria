@@ -11,7 +11,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#E6E1CF] flex flex-col">
 
-      {/* BANNER */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -29,7 +28,6 @@ export default function Home() {
         />
       </motion.div>
 
-      {/* CONTEÚDO */}
       <section className="flex-1 flex items-center justify-center px-4 md:p-4">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -38,7 +36,6 @@ export default function Home() {
           className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-3 sm:p-10 sm:-mt-52 border border-[#E6E1CF]"
         >
 
-          {/* LOGO */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -54,7 +51,6 @@ export default function Home() {
             />
           </motion.div>
 
-          {/* TEXTO */}
           <div className="text-center mt-4">
             <h1 className="text-2xl sm:text-3xl font-semibold text-[#1F1312] mb-3">
               Sistema de Gerenciamento de Vendas
@@ -66,7 +62,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* BOTÕES */}
           <motion.div
             initial="hidden"
             animate="visible"
@@ -78,7 +73,6 @@ export default function Home() {
             }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6"
           >
-            {/* NOVA VENDA */}
             <motion.button
               variants={{
                 hidden: { opacity: 0, y: 20 },
@@ -103,7 +97,6 @@ export default function Home() {
               </p>
             </motion.button>
 
-            {/* RELATÓRIOS */}
             <motion.button
               variants={{
                 hidden: { opacity: 0, y: 20 },
