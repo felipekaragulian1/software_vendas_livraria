@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     // NOTA: A tabela Produtos já está criada e preenchida no banco
     // Este endpoint APENAS CONSULTA (SELECT) - não faz INSERT/UPDATE/DELETE
-    
+
     // Se query for um número (após trim), buscar por ID exato
     const trimmedQuery = query.trim();
     if (trimmedQuery && !isNaN(Number(trimmedQuery))) {
@@ -60,13 +60,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ products });
   } catch (error: any) {
-    // Erro já foi logado formatado em db.ts (com rate limiting)
+    console.error('❌ ERRO /api/products:', error);
+
     return NextResponse.json(
       {
         error: 'Erro ao buscar produtos',
-        message: 'Não foi possível conectar ao banco de dados. Verifique a configuração.',
+        message: error?.message || 'Erro desconhecido',
       },
       { status: 500 }
     );
   }
+
 }

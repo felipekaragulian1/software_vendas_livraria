@@ -224,7 +224,7 @@ function logError(err: any, config: { host: string; port: number; database: stri
   if (err.stack) {
     const stackLines = err.stack.split('\n').slice(0, 3);
     console.error(`\n📍 Stack (resumido):`);
-    stackLines.forEach(line => console.error(`   ${line.trim()}`));
+    stackLines.forEach((line: string) => console.error(`   ${line.trim()}`));
   }
   
   console.error('='.repeat(60) + '\n');
