@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchReports, ReportData } from '@/lib/api';
 import Toast, { ToastType } from '@/components/Toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DollarSign, ShoppingCart, TrendingUp, Download, ArrowLeft, Calendar, CreditCard, QrCode, Banknote } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, Download, ArrowLeft, Calendar, CreditCard, QrCode, Banknote, Filter } from 'lucide-react';
 
 interface ToastState {
   message: string;
@@ -20,6 +20,8 @@ export default function ReportsPage() {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [filterOption, setFilterOption] = useState<string>('quantidade-desc');
 
   const showToast = (message: string, type: ToastType) => {
     setToast({ message, type });
@@ -61,7 +63,7 @@ export default function ReportsPage() {
       const { from, to } = getDateRange();
       const reports = await fetchReports(from || undefined, to || undefined);
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       setData(reports);
     } catch (error: any) {
@@ -84,6 +86,128 @@ export default function ReportsPage() {
       return;
     }
     loadReports();
+  };
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+    setFilterOption('');
+  };
+
+  const handleFilterChange = (option: string) => {
+    setFilterOption(option);
+    setSortConfig(null); 
+  };
+
+  const getSortedData = () => {
+    const dataToSort = [...(data?.todosProdutosPorId || data?.todosProdutosVendidos || data?.topProdutosQuantidade || [])];
+    
+    if (filterOption) {
+      const [key, direction] = filterOption.split('-') as [string, 'asc' | 'desc'];
+      
+      return dataToSort.sort((a: any, b: any) => {
+        let aValue, bValue;
+
+        switch (key) {
+          case 'quantidade':
+            aValue = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
+            bValue = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
+            break;
+          case 'estoque':
+            aValue = a.estoqueDisponivel !== undefined ? a.estoqueDisponivel : (a.estoqueAtual !== undefined ? a.estoqueAtual : -1);
+            bValue = b.estoqueDisponivel !== undefined ? b.estoqueDisponivel : (b.estoqueAtual !== undefined ? b.estoqueAtual : -1);
+            break;
+          case 'faturamento':
+            aValue = a.totalFaturado || a.totalFaturamento || 0;
+            bValue = b.totalFaturado || b.totalFaturamento || 0;
+            break;
+          case 'preco':
+            aValue = a.precoAtual || 0;
+            bValue = b.precoAtual || 0;
+            break;
+          case 'nome':
+            aValue = a.nome.toLowerCase();
+            bValue = b.nome.toLowerCase();
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    
+    if (sortConfig) {
+      return dataToSort.sort((a: any, b: any) => {
+        let aValue, bValue;
+
+        switch (sortConfig.key) {
+          case 'id':
+            aValue = a.id;
+            bValue = b.id;
+            break;
+          case 'nome':
+            aValue = a.nome.toLowerCase();
+            bValue = b.nome.toLowerCase();
+            break;
+          case 'quantidade':
+            aValue = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
+            bValue = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
+            break;
+          case 'estoque':
+            aValue = a.estoqueDisponivel !== undefined ? a.estoqueDisponivel : (a.estoqueAtual !== undefined ? a.estoqueAtual : -1);
+            bValue = b.estoqueDisponivel !== undefined ? b.estoqueDisponivel : (b.estoqueAtual !== undefined ? b.estoqueAtual : -1);
+            break;
+          case 'preco':
+            aValue = a.precoAtual || 0;
+            bValue = b.precoAtual || 0;
+            break;
+          case 'valorMedio':
+            const quantA = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
+            const quantB = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
+            const fatA = a.totalFaturado || a.totalFaturamento || 0;
+            const fatB = b.totalFaturado || b.totalFaturamento || 0;
+            aValue = quantA > 0 ? fatA / quantA : 0;
+            bValue = quantB > 0 ? fatB / quantB : 0;
+            break;
+          case 'faturamento':
+            aValue = a.totalFaturado || a.totalFaturamento || 0;
+            bValue = b.totalFaturado || b.totalFaturamento || 0;
+            break;
+          default:
+            return 0;
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return dataToSort.sort((a: any, b: any) => {
+      const quantA = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
+      const quantB = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
+      const fatA = a.totalFaturado || a.totalFaturamento || 0;
+      const fatB = b.totalFaturado || b.totalFaturamento || 0;
+      
+      if (quantB !== quantA) {
+        return quantB - quantA;
+      }
+      return fatB - fatA;
+    });
   };
 
   const exportToCSV = () => {
@@ -200,7 +324,7 @@ export default function ReportsPage() {
 
     // Gerar CSV
     const csvContent = csvRows.join('\n');
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM para Excel
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     const fileName = `relatorio-vendas-${periodo.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
@@ -465,87 +589,167 @@ export default function ReportsPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-6 mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#1F1312]">Relatório Completo por Produto</h2>
-                <span className="px-4 py-1.5 bg-[#E6E1CF] text-[#1F1312] rounded-full text-sm font-semibold">
-                  {data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || data.topProdutosQuantidade.length} produtos
-                </span>
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-[#1F1312]">Relatório Completo por Produto</h2>
+                  <span className="px-4 py-1.5 bg-[#E6E1CF] text-[#1F1312] rounded-full text-sm font-semibold">
+                    {data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || data.topProdutosQuantidade.length} produtos
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <select
+                    value={filterOption}
+                    onChange={(e) => handleFilterChange(e.target.value)}
+                    className="px-4 py-2 border border-[#E6E1CF] rounded-xl text-[#1F1312] font-semibold focus:border-[#1F1312] focus:ring-2 focus:ring-[#E6E1CF] focus:outline-none transition-all text-sm"
+                  >
+                    <option value="">Padrão (Qtd Vendida)</option>
+                    <option value="quantidade-desc">Maior Quantidade</option>
+                    <option value="quantidade-asc">Menor Quantidade</option>
+                    <option value="faturamento-desc">Maior Faturamento</option>
+                    <option value="faturamento-asc">Menor Faturamento</option>
+                    <option value="estoque-desc">Maior Estoque</option>
+                    <option value="estoque-asc">Menor Estoque</option>
+                    <option value="preco-desc">Maior Preço</option>
+                    <option value="preco-asc">Menor Preço</option>
+                    <option value="nome-asc">Nome A-Z</option>
+                    <option value="nome-desc">Nome Z-A</option>
+                  </select>
+                </div>
               </div>
+              
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b-2 border-[#E6E1CF] bg-[#E6E1CF]/30">
-                      <th className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm">ID</th>
-                      <th className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm">Produto</th>
-                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Qtd Vendida</th>
-                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Estoque</th>
-                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Preço Atual</th>
-                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Valor Unit. Médio</th>
-                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Total Faturado</th>
+                      <th 
+                        onClick={() => handleSort('id')}
+                        className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-1">
+                          ID
+                          {sortConfig?.key === 'id' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('nome')}
+                        className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-1">
+                          Produto
+                          {sortConfig?.key === 'nome' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('quantidade')}
+                        className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          Qtd Vendida
+                          {sortConfig?.key === 'quantidade' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('estoque')}
+                        className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          Estoque
+                          {sortConfig?.key === 'estoque' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('preco')}
+                        className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          Preço Atual
+                          {sortConfig?.key === 'preco' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('valorMedio')}
+                        className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          Valor Unit. Médio
+                          {sortConfig?.key === 'valorMedio' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
+                      <th 
+                        onClick={() => handleSort('faturamento')}
+                        className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm cursor-pointer hover:bg-[#E6E1CF]/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-end gap-1">
+                          Total Faturado
+                          {sortConfig?.key === 'faturamento' && (
+                            <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(data.todosProdutosPorId || data.todosProdutosVendidos || data.topProdutosQuantidade)
-                      .sort((a: any, b: any) => {
-                        const quantA = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
-                        const quantB = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
-                        const fatA = a.totalFaturado || a.totalFaturamento || 0;
-                        const fatB = b.totalFaturado || b.totalFaturamento || 0;
+                    {getSortedData().slice(0, 50).map((prod: any, index: number) => {
+                      const quantidadeVendida = prod.quantidadeVendida || prod.totalQuantidadeVendida || prod.totalQuantidade || 0;
+                      const totalFaturado = prod.totalFaturado || prod.totalFaturamento || 0;
+                      const valorUnitarioMedio = quantidadeVendida > 0
+                        ? (totalFaturado / quantidadeVendida)
+                        : 0;
+                      const estoqueDisponivel = prod.estoqueDisponivel !== undefined
+                        ? prod.estoqueDisponivel
+                        : prod.estoqueAtual !== undefined
+                          ? prod.estoqueAtual
+                          : null;
+                      const precoAtual = prod.precoAtual || 0;
 
-                        if (quantB !== quantA) {
-                          return quantB - quantA;
-                        }
-                        return fatB - fatA;
-                      })
-                      .slice(0, 50)
-                      .map((prod: any, index: number) => {
-                        const quantidadeVendida = prod.quantidadeVendida || prod.totalQuantidadeVendida || prod.totalQuantidade || 0;
-                        const totalFaturado = prod.totalFaturado || prod.totalFaturamento || 0;
-                        const valorUnitarioMedio = quantidadeVendida > 0
-                          ? (totalFaturado / quantidadeVendida)
-                          : 0;
-                        const estoqueDisponivel = prod.estoqueDisponivel !== undefined
-                          ? prod.estoqueDisponivel
-                          : prod.estoqueAtual !== undefined
-                            ? prod.estoqueAtual
-                            : null;
-                        const precoAtual = prod.precoAtual || 0;
-
-                        return (
-                          <tr
-                            key={prod.id}
-                            className={`border-b border-[#E6E1CF] hover:bg-[#E6E1CF]/20 transition-colors ${index < 3 ? 'bg-[#E6E1CF]/10' : ''
-                              } ${quantidadeVendida === 0 ? 'opacity-50' : ''}`}
-                          >
-                            <td className="py-4 px-4 font-mono text-sm text-[#1F1312]/70">{prod.id}</td>
-                            <td className="py-4 px-4 font-semibold text-[#1F1312]">{prod.nome}</td>
-                            <td className={`text-right py-4 px-4 font-bold ${quantidadeVendida > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
-                              }`}>
-                              {quantidadeVendida}
-                            </td>
-                            <td className={`text-right py-4 px-4 font-semibold ${estoqueDisponivel !== null
+                      return (
+                        <tr
+                          key={prod.id}
+                          className={`border-b border-[#E6E1CF] hover:bg-[#E6E1CF]/20 transition-colors ${index < 3 && !sortConfig && !filterOption ? 'bg-[#E6E1CF]/10' : ''
+                            } ${quantidadeVendida === 0 ? 'opacity-50' : ''}`}
+                        >
+                          <td className="py-4 px-4 font-mono text-sm text-[#1F1312]/70">{prod.id}</td>
+                          <td className="py-4 px-4 font-semibold text-[#1F1312]">{prod.nome}</td>
+                          <td className={`text-right py-4 px-4 font-bold ${quantidadeVendida > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
+                            }`}>
+                            {quantidadeVendida}
+                          </td>
+                          <td className={`text-right py-4 px-4 font-semibold ${estoqueDisponivel !== null
                               ? estoqueDisponivel === 0
                                 ? 'text-red-600'
                                 : estoqueDisponivel < 10
                                   ? 'text-yellow-600'
                                   : 'text-green-600'
                               : 'text-[#1F1312]/40'
-                              }`}>
-                              {estoqueDisponivel !== null ? estoqueDisponivel : 'N/A'}
-                            </td>
-                            <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
-                              {precoAtual > 0 ? `R$ ${precoAtual.toFixed(2).replace('.', ',')}` : 'N/A'}
-                            </td>
-                            <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
-                              {valorUnitarioMedio > 0 ? `R$ ${valorUnitarioMedio.toFixed(2).replace('.', ',')}` : '-'}
-                            </td>
-                            <td className={`text-right py-4 px-4 font-bold ${totalFaturado > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
-                              }`}>
-                              {totalFaturado > 0 ? `R$ ${totalFaturado.toFixed(2).replace('.', ',')}` : '-'}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                            }`}>
+                            {estoqueDisponivel !== null ? estoqueDisponivel : 'N/A'}
+                          </td>
+                          <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
+                            {precoAtual > 0 ? `R$ ${precoAtual.toFixed(2).replace('.', ',')}` : 'N/A'}
+                          </td>
+                          <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
+                            {valorUnitarioMedio > 0 ? `R$ ${valorUnitarioMedio.toFixed(2).replace('.', ',')}` : '-'}
+                          </td>
+                          <td className={`text-right py-4 px-4 font-bold ${totalFaturado > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
+                            }`}>
+                            {totalFaturado > 0 ? `R$ ${totalFaturado.toFixed(2).replace('.', ',')}` : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
                 {(data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || 0) > 50 && (
