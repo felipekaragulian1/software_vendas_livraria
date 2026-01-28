@@ -19,6 +19,7 @@ import CheckoutSummary from '@/components/CheckoutSummary';
 import Toast, { ToastType } from '@/components/Toast';
 import { Product, CartItem, createSale } from '@/lib/api';
 
+
 interface ToastState {
   message: string;
   type: ToastType;
@@ -137,9 +138,9 @@ export default function CheckoutPage() {
 
           <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-gray-600 hover:text-black"
+            className="px-5 py-2.5 text-[#1F1312] hover:text-[#1F1312] bg-white hover:bg-[#E6E1CF] rounded-xl transition-all shadow-sm hover:shadow-md border border-[#E6E1CF] flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft size={18} />
             Voltar
           </button>
         </div>

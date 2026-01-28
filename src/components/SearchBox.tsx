@@ -250,7 +250,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
         />
         {isLoading && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#1F1312] border-t-transparent"></div>
           </div>
         )}
       </div>

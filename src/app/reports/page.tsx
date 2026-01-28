@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchReports, ReportData } from '@/lib/api';
 import Toast, { ToastType } from '@/components/Toast';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DollarSign, ShoppingCart, TrendingUp, Download, ArrowLeft, Calendar, CreditCard, QrCode, Banknote } from 'lucide-react';
 
 interface ToastState {
   message: string;
@@ -58,6 +60,9 @@ export default function ReportsPage() {
     try {
       const { from, to } = getDateRange();
       const reports = await fetchReports(from || undefined, to || undefined);
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       setData(reports);
     } catch (error: any) {
       console.error('Erro ao carregar relatórios:', error);
@@ -99,14 +104,14 @@ export default function ReportsPage() {
     csvRows.push('RELATÓRIO COMPLETO POR ID DE PRODUTO');
     csvRows.push('═══════════════════════════════════════════════════════════');
     csvRows.push('ID,Produto,Quantidade Vendida,Estoque Disponível,Preço Atual,Valor Unitário Médio,Total Faturado');
-    
+
     // Usar todosProdutosPorId que inclui TODOS os produtos (até os que não foram vendidos)
     if (data.todosProdutosPorId && data.todosProdutosPorId.length > 0) {
       data.todosProdutosPorId.forEach((prod) => {
-        const valorUnitarioMedio = prod.quantidadeVendida > 0 
+        const valorUnitarioMedio = prod.quantidadeVendida > 0
           ? (prod.totalFaturado / prod.quantidadeVendida).toFixed(2)
           : '0.00';
-        
+
         csvRows.push(
           `${prod.id},"${prod.nome}",${prod.quantidadeVendida},${prod.estoqueDisponivel},${prod.precoAtual.toFixed(2)},${valorUnitarioMedio},${prod.totalFaturado.toFixed(2)}`
         );
@@ -114,10 +119,10 @@ export default function ReportsPage() {
     } else if (data.todosProdutosVendidos && data.todosProdutosVendidos.length > 0) {
       // Fallback: usar todosProdutosVendidos se todosProdutosPorId não estiver disponível
       data.todosProdutosVendidos.forEach((prod) => {
-        const valorUnitarioMedio = prod.totalQuantidadeVendida > 0 
+        const valorUnitarioMedio = prod.totalQuantidadeVendida > 0
           ? (prod.totalFaturamento / prod.totalQuantidadeVendida).toFixed(2)
           : '0.00';
-        
+
         csvRows.push(
           `${prod.id},"${prod.nome}",${prod.totalQuantidadeVendida},${prod.estoqueAtual},${prod.precoAtual.toFixed(2)},${valorUnitarioMedio},${prod.totalFaturamento.toFixed(2)}`
         );
@@ -125,16 +130,16 @@ export default function ReportsPage() {
     } else {
       // Fallback final: usar topProdutosQuantidade
       data.topProdutosQuantidade.forEach((prod) => {
-        const valorUnitarioMedio = prod.totalQuantidade > 0 
+        const valorUnitarioMedio = prod.totalQuantidade > 0
           ? (prod.totalFaturamento / prod.totalQuantidade).toFixed(2)
           : '0.00';
-        
+
         csvRows.push(
           `${prod.id},"${prod.nome}",${prod.totalQuantidade},N/A,N/A,${valorUnitarioMedio},${prod.totalFaturamento.toFixed(2)}`
         );
       });
     }
-    
+
     csvRows.push('');
 
     // ===== RESUMO GERAL =====
@@ -223,7 +228,7 @@ export default function ReportsPage() {
   const ticketMedio = totalPedidos > 0 ? totalVendido / totalPedidos : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#F5F3ED] p-4 md:p-8">
       {toast && (
         <Toast
           message={toast.message}
@@ -233,91 +238,93 @@ export default function ReportsPage() {
       )}
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Relatórios de Vendas
-          </h1>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1F1312] mb-2">
+              Relatórios de Vendas
+            </h1>
+            <p className="text-[#1F1312]/70">Análise detalhada de performance</p>
+          </div>
           <button
             onClick={() => router.push('/')}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-5 py-2.5 text-[#1F1312] hover:text-[#1F1312] bg-white hover:bg-[#E6E1CF] rounded-xl transition-all shadow-sm hover:shadow-md border border-[#E6E1CF] flex items-center gap-2"
           >
-            ← Voltar
+            <ArrowLeft size={18} />
+            Voltar
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Filtros</h2>
-          <div className="flex flex-wrap gap-3 mb-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-6 mb-8">
+          <div className="flex items-center gap-2 mb-5">
+            <Calendar size={20} className="text-[#1F1312]" />
+            <h2 className="text-lg font-bold text-[#1F1312]">Período de Análise</h2>
+          </div>
+          <div className="flex flex-wrap gap-3 mb-5">
             <button
               onClick={() => setDateFilter('today')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                dateFilter === 'today'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${dateFilter === 'today'
+                ? 'bg-[#1F1312] text-white shadow-md'
+                : 'bg-[#E6E1CF] text-[#1F1312] hover:bg-[#D6D1BF]'
+                }`}
             >
               Hoje
             </button>
             <button
               onClick={() => setDateFilter('yesterday')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                dateFilter === 'yesterday'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${dateFilter === 'yesterday'
+                ? 'bg-[#1F1312] text-white shadow-md'
+                : 'bg-[#E6E1CF] text-[#1F1312] hover:bg-[#D6D1BF]'
+                }`}
             >
               Ontem
             </button>
             <button
               onClick={() => setDateFilter('week')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                dateFilter === 'week'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${dateFilter === 'week'
+                ? 'bg-[#1F1312] text-white shadow-md'
+                : 'bg-[#E6E1CF] text-[#1F1312] hover:bg-[#D6D1BF]'
+                }`}
             >
               7 Dias
             </button>
             <button
               onClick={() => setDateFilter('custom')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                dateFilter === 'custom'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${dateFilter === 'custom'
+                ? 'bg-[#1F1312] text-white shadow-md'
+                : 'bg-[#E6E1CF] text-[#1F1312] hover:bg-[#D6D1BF]'
+                }`}
             >
               Personalizado
             </button>
           </div>
 
           {dateFilter === 'custom' && (
-            <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex flex-col md:flex-row gap-4 items-end bg-[#E6E1CF]/30 p-4 rounded-xl">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-[#1F1312] mb-2">
                   Data Inicial
                 </label>
                 <input
                   type="date"
                   value={customFrom}
                   onChange={(e) => setCustomFrom(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 border border-[#E6E1CF] rounded-xl focus:border-[#1F1312] focus:ring-2 focus:ring-[#E6E1CF] focus:outline-none transition-all text-[#1F1312]"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-[#1F1312] mb-2">
                   Data Final
                 </label>
                 <input
                   type="date"
                   value={customTo}
                   onChange={(e) => setCustomTo(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  className="w-full px-4 py-2.5 border border-[#E6E1CF] rounded-xl focus:border-[#1F1312] focus:ring-2 focus:ring-[#E6E1CF] focus:outline-none transition-all text-[#1F1312]"
                 />
               </div>
               <button
                 onClick={handleCustomDateLoad}
-                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold"
+                className="px-6 py-2.5 bg-[#1F1312] hover:bg-[#2F2322] text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
               >
                 Carregar
               </button>
@@ -325,222 +332,235 @@ export default function ReportsPage() {
           )}
 
           {data && (
-            <div className="mt-4 flex justify-end gap-3">
+            <div className="mt-5 flex justify-end">
               <button
                 onClick={exportToCSV}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
-                title="Exportar relatório completo em CSV (inclui produto e quantidade)"
+                className="px-5 py-2.5 bg-[#1F1312] hover:bg-[#2F2322] text-white rounded-xl font-semibold flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
               >
-                📥 Exportar CSV Completo
+                <Download size={18} />
+                Exportar CSV Completo
               </button>
             </div>
           )}
         </div>
 
         {isLoading ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando relatórios...</p>
+          <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-16 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#1F1312] border-t-transparent mx-auto mb-4"></div>
+            <p className="text-[#1F1312]/70 font-medium">Carregando relatórios...</p>
           </div>
         ) : data ? (
           <>
-            {/* Cards de Resumo */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Total Vendido
-                </h3>
-                <p className="text-3xl font-bold text-blue-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white border-2 border-[#E6E1CF] rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-[#1F1312]/70">
+                    Total Vendido
+                  </h3>
+                  <div className="p-3 bg-[#E6E1CF] rounded-xl">
+                    <DollarSign size={24} className="text-[#1F1312]" />
+                  </div>
+                </div>
+                <p className="text-4xl font-bold text-[#1F1312] mb-1">
                   R$ {totalVendido.toFixed(2).replace('.', ',')}
                 </p>
+                <p className="text-sm text-[#1F1312]/60">Faturamento total</p>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Número de Vendas
-                </h3>
-                <p className="text-3xl font-bold text-green-600">
+
+              <div className="bg-white border-2 border-[#E6E1CF] rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-[#1F1312]/70">
+                    Número de Vendas
+                  </h3>
+                  <div className="p-3 bg-[#E6E1CF] rounded-xl">
+                    <ShoppingCart size={24} className="text-[#1F1312]" />
+                  </div>
+                </div>
+                <p className="text-4xl font-bold text-[#1F1312] mb-1">
                   {totalPedidos}
                 </p>
+                <p className="text-sm text-[#1F1312]/60">Pedidos realizados</p>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">
-                  Ticket Médio
-                </h3>
-                <p className="text-3xl font-bold text-purple-600">
+
+              <div className="bg-white border-2 border-[#E6E1CF] rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-[#1F1312]/70">
+                    Ticket Médio
+                  </h3>
+                  <div className="p-3 bg-[#E6E1CF] rounded-xl">
+                    <TrendingUp size={24} className="text-[#1F1312]" />
+                  </div>
+                </div>
+                <p className="text-4xl font-bold text-[#1F1312] mb-1">
                   R$ {ticketMedio.toFixed(2).replace('.', ',')}
                 </p>
+                <p className="text-sm text-[#1F1312]/60">Valor médio por venda</p>
               </div>
+
+              {data.totalPorFormaPagamento.length > 0 && data.totalPorFormaPagamento.map((fp) => (
+                <div
+                  key={fp.formaPagamento}
+                  className="bg-white border-2 border-[#E6E1CF] rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-[#1F1312]/70">
+                      {fp.formaPagamento}
+                    </h3>
+                    <div className="p-3 bg-[#E6E1CF] rounded-xl">
+                      {fp.formaPagamento.toLowerCase().includes('pix') || fp.formaPagamento.toLowerCase().includes('qr') ? (
+                        <QrCode size={24} className="text-[#1F1312]" />
+                      ) : fp.formaPagamento.toLowerCase().includes('dinheiro') || fp.formaPagamento.toLowerCase().includes('espécie') ? (
+                        <Banknote size={24} className="text-[#1F1312]" />
+                      ) : (
+                        <CreditCard size={24} className="text-[#1F1312]" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-4xl font-bold text-[#1F1312] mb-1">
+                    R$ {fp.total.toFixed(2).replace('.', ',')}
+                  </p>
+                  <p className="text-sm text-[#1F1312]/60">Total recebido</p>
+                </div>
+              ))}
             </div>
 
-            {/* Relatório Completo por ID de Produto - Destaque */}
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Relatório Completo por ID de Produto</h2>
-                <span className="text-sm text-gray-500">
+            <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-6 mb-8">
+              <h2 className="text-xl font-bold text-[#1F1312] mb-6">Evolução de Vendas</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.totalVendidoPorDia}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E6E1CF" />
+                  <XAxis
+                    dataKey="data"
+                    stroke="#1F1312"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis
+                    stroke="#1F1312"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #E6E1CF',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                      color: '#1F1312'
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="totalVendido"
+                    fill="#1F1312"
+                    name="Total Vendido (R$)"
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="numPedidos"
+                    fill="#8B7355"
+                    name="Número de Pedidos"
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-6 mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-[#1F1312]">Relatório Completo por Produto</h2>
+                <span className="px-4 py-1.5 bg-[#E6E1CF] text-[#1F1312] rounded-full text-sm font-semibold">
                   {data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || data.topProdutosQuantidade.length} produtos
                 </span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-300 bg-gray-50">
-                      <th className="text-left py-3 px-4 font-semibold">ID</th>
-                      <th className="text-left py-3 px-4 font-semibold">Produto</th>
-                      <th className="text-right py-3 px-4 font-semibold">Qtd Vendida</th>
-                      <th className="text-right py-3 px-4 font-semibold">Estoque Disponível</th>
-                      <th className="text-right py-3 px-4 font-semibold">Preço Atual</th>
-                      <th className="text-right py-3 px-4 font-semibold">Valor Unit. Médio</th>
-                      <th className="text-right py-3 px-4 font-semibold">Total Faturado</th>
+                    <tr className="border-b-2 border-[#E6E1CF] bg-[#E6E1CF]/30">
+                      <th className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm">ID</th>
+                      <th className="text-left py-4 px-4 font-bold text-[#1F1312] text-sm">Produto</th>
+                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Qtd Vendida</th>
+                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Estoque</th>
+                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Preço Atual</th>
+                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Valor Unit. Médio</th>
+                      <th className="text-right py-4 px-4 font-bold text-[#1F1312] text-sm">Total Faturado</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(data.todosProdutosPorId || data.todosProdutosVendidos || data.topProdutosQuantidade).slice(0, 50).map((prod: any, index: number) => {
-                      const quantidadeVendida = prod.quantidadeVendida || prod.totalQuantidadeVendida || prod.totalQuantidade || 0;
-                      const totalFaturado = prod.totalFaturado || prod.totalFaturamento || 0;
-                      const valorUnitarioMedio = quantidadeVendida > 0 
-                        ? (totalFaturado / quantidadeVendida)
-                        : 0;
-                      const estoqueDisponivel = prod.estoqueDisponivel !== undefined 
-                        ? prod.estoqueDisponivel 
-                        : prod.estoqueAtual !== undefined 
-                          ? prod.estoqueAtual 
-                          : null;
-                      const precoAtual = prod.precoAtual || 0;
-                      
-                      return (
-                        <tr 
-                          key={prod.id} 
-                          className={`border-b hover:bg-blue-50 transition-colors ${
-                            index < 3 ? 'bg-blue-50/30' : ''
-                          } ${quantidadeVendida === 0 ? 'opacity-60' : ''}`}
-                        >
-                          <td className="py-3 px-4 font-mono text-sm text-gray-600">{prod.id}</td>
-                          <td className="py-3 px-4 font-medium">{prod.nome}</td>
-                          <td className={`text-right py-3 px-4 font-bold ${
-                            quantidadeVendida > 0 ? 'text-blue-600' : 'text-gray-400'
-                          }`}>
-                            {quantidadeVendida}
-                          </td>
-                          <td className={`text-right py-3 px-4 font-semibold ${
-                            estoqueDisponivel !== null 
-                              ? estoqueDisponivel === 0 
-                                ? 'text-red-600' 
-                                : estoqueDisponivel < 10 
-                                  ? 'text-yellow-600' 
+                    {(data.todosProdutosPorId || data.todosProdutosVendidos || data.topProdutosQuantidade)
+                      .sort((a: any, b: any) => {
+                        const quantA = a.quantidadeVendida || a.totalQuantidadeVendida || a.totalQuantidade || 0;
+                        const quantB = b.quantidadeVendida || b.totalQuantidadeVendida || b.totalQuantidade || 0;
+                        const fatA = a.totalFaturado || a.totalFaturamento || 0;
+                        const fatB = b.totalFaturado || b.totalFaturamento || 0;
+
+                        if (quantB !== quantA) {
+                          return quantB - quantA;
+                        }
+                        return fatB - fatA;
+                      })
+                      .slice(0, 50)
+                      .map((prod: any, index: number) => {
+                        const quantidadeVendida = prod.quantidadeVendida || prod.totalQuantidadeVendida || prod.totalQuantidade || 0;
+                        const totalFaturado = prod.totalFaturado || prod.totalFaturamento || 0;
+                        const valorUnitarioMedio = quantidadeVendida > 0
+                          ? (totalFaturado / quantidadeVendida)
+                          : 0;
+                        const estoqueDisponivel = prod.estoqueDisponivel !== undefined
+                          ? prod.estoqueDisponivel
+                          : prod.estoqueAtual !== undefined
+                            ? prod.estoqueAtual
+                            : null;
+                        const precoAtual = prod.precoAtual || 0;
+
+                        return (
+                          <tr
+                            key={prod.id}
+                            className={`border-b border-[#E6E1CF] hover:bg-[#E6E1CF]/20 transition-colors ${index < 3 ? 'bg-[#E6E1CF]/10' : ''
+                              } ${quantidadeVendida === 0 ? 'opacity-50' : ''}`}
+                          >
+                            <td className="py-4 px-4 font-mono text-sm text-[#1F1312]/70">{prod.id}</td>
+                            <td className="py-4 px-4 font-semibold text-[#1F1312]">{prod.nome}</td>
+                            <td className={`text-right py-4 px-4 font-bold ${quantidadeVendida > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
+                              }`}>
+                              {quantidadeVendida}
+                            </td>
+                            <td className={`text-right py-4 px-4 font-semibold ${estoqueDisponivel !== null
+                              ? estoqueDisponivel === 0
+                                ? 'text-red-600'
+                                : estoqueDisponivel < 10
+                                  ? 'text-yellow-600'
                                   : 'text-green-600'
-                              : 'text-gray-400'
-                          }`}>
-                            {estoqueDisponivel !== null ? estoqueDisponivel : 'N/A'}
-                          </td>
-                          <td className="text-right py-3 px-4 text-gray-600">
-                            {precoAtual > 0 ? `R$ ${precoAtual.toFixed(2).replace('.', ',')}` : 'N/A'}
-                          </td>
-                          <td className="text-right py-3 px-4 text-gray-600">
-                            {valorUnitarioMedio > 0 ? `R$ ${valorUnitarioMedio.toFixed(2).replace('.', ',')}` : '-'}
-                          </td>
-                          <td className={`text-right py-3 px-4 font-semibold ${
-                            totalFaturado > 0 ? 'text-green-600' : 'text-gray-400'
-                          }`}>
-                            {totalFaturado > 0 ? `R$ ${totalFaturado.toFixed(2).replace('.', ',')}` : '-'}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                              : 'text-[#1F1312]/40'
+                              }`}>
+                              {estoqueDisponivel !== null ? estoqueDisponivel : 'N/A'}
+                            </td>
+                            <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
+                              {precoAtual > 0 ? `R$ ${precoAtual.toFixed(2).replace('.', ',')}` : 'N/A'}
+                            </td>
+                            <td className="text-right py-4 px-4 text-[#1F1312]/70 font-medium">
+                              {valorUnitarioMedio > 0 ? `R$ ${valorUnitarioMedio.toFixed(2).replace('.', ',')}` : '-'}
+                            </td>
+                            <td className={`text-right py-4 px-4 font-bold ${totalFaturado > 0 ? 'text-[#1F1312]' : 'text-[#1F1312]/40'
+                              }`}>
+                              {totalFaturado > 0 ? `R$ ${totalFaturado.toFixed(2).replace('.', ',')}` : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
                 {(data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || 0) > 50 && (
-                  <div className="mt-4 text-center text-sm text-gray-500">
-                    Mostrando 50 de {data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || 0} produtos. 
+                  <div className="mt-6 text-center text-sm text-[#1F1312]/60 bg-[#E6E1CF]/20 py-3 rounded-xl">
+                    Mostrando 50 de {data.todosProdutosPorId?.length || data.todosProdutosVendidos?.length || 0} produtos.
                     Exporte o CSV para ver todos os produtos por ID.
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Top Produtos */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
-              <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
-                <h2 className="text-xl font-bold mb-4">Top Produtos por Quantidade</h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-2">Produto</th>
-                        <th className="text-right py-2 px-2">Qtd</th>
-                        <th className="text-right py-2 px-2">Faturamento</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.topProdutosQuantidade.map((prod) => (
-                        <tr key={prod.id} className="border-b hover:bg-gray-50">
-                          <td className="py-2 px-2">{prod.nome}</td>
-                          <td className="text-right py-2 px-2 font-semibold">
-                            {prod.totalQuantidade}
-                          </td>
-                          <td className="text-right py-2 px-2">
-                            R$ {prod.totalFaturamento.toFixed(2).replace('.', ',')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
-                <h2 className="text-xl font-bold mb-4">Top Produtos por Faturamento</h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-2">Produto</th>
-                        <th className="text-right py-2 px-2">Qtd</th>
-                        <th className="text-right py-2 px-2">Faturamento</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.topProdutosFaturamento.map((prod) => (
-                        <tr key={prod.id} className="border-b hover:bg-gray-50">
-                          <td className="py-2 px-2">{prod.nome}</td>
-                          <td className="text-right py-2 px-2 font-semibold">
-                            {prod.totalQuantidade}
-                          </td>
-                          <td className="text-right py-2 px-2">
-                            R$ {prod.totalFaturamento.toFixed(2).replace('.', ',')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* Total por Forma de Pagamento */}
-            {data.totalPorFormaPagamento.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
-                <h2 className="text-xl font-bold mb-4">Total por Forma de Pagamento</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {data.totalPorFormaPagamento.map((fp) => (
-                    <div
-                      key={fp.formaPagamento}
-                      className="border border-gray-200 rounded-lg p-4"
-                    >
-                      <p className="text-sm text-gray-500 mb-1">
-                        {fp.formaPagamento}
-                      </p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        R$ {fp.total.toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center text-gray-500">
-            Selecione um filtro para ver os relatórios
+          <div className="bg-white rounded-2xl shadow-lg border border-[#E6E1CF] p-16 text-center">
+            <div className="text-6xl mb-4">📊</div>
+            <p className="text-[#1F1312]/70 text-lg font-medium">Selecione um filtro para visualizar os relatórios</p>
           </div>
         )}
       </div>
