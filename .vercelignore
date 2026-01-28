@@ -1,0 +1,12 @@
+# Arquivos que não devem ser enviados para Vercel
+node_modules
+.next
+.env*.local
+.git
+README.md
+DEPLOY.md
+PDV_GUIDE.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+railway.json

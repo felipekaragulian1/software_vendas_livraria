@@ -255,6 +255,24 @@ npm run build
 npm start
 ```
 
+## 🚀 Deploy
+
+Para instruções detalhadas de deploy, consulte o **[Guia de Deploy (DEPLOY.md)](./DEPLOY.md)**.
+
+**Opções recomendadas:**
+- **Vercel** - Melhor para começar rápido (otimizado para Next.js)
+- **Railway** - Excelente para Node.js + SQL Server
+- **VPS** - Máximo controle (DigitalOcean, AWS EC2)
+- **Docker** - Portabilidade entre ambientes
+
+**Quick Start (Vercel):**
+```bash
+npm i -g vercel
+vercel login
+vercel
+# Configure variáveis de ambiente no dashboard
+```
+
 ## 🔍 Descoberta Automática de Schema
 
 O sistema descobre automaticamente a estrutura das tabelas `Pedidos` e `PedidoItens` usando `INFORMATION_SCHEMA`, permitindo flexibilidade com diferentes estruturas de banco legado.
