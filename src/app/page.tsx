@@ -76,7 +76,7 @@ export default function Home() {
               </h2>
 
 
-              <p className="text-gray-500 text-sm sm:text-base">
+              <p className="text-gray-500 text-sm sm:text-base group-hover:text-[#1f0000]/60">
                 Visualizar relatórios de vendas
               </p>
             </button>
