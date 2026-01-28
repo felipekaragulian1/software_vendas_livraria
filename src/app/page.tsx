@@ -11,8 +11,8 @@ export default function Home() {
     <main className="min-h-screen bg-[#E6E1CF] flex flex-col">
       <div className="w-full bg-gray-100">
         <Image
-          src="/telao-camisas.png"
-          alt="GS Store Banner"
+          src="/banner-GS.png"
+          alt="Banner GS"
           width={1920}
           height={600}
           priority
@@ -23,10 +23,10 @@ export default function Home() {
 
 
       <section className="flex-1 flex items-center justify-center px-4 p-0 md:p-4">
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-3 sm:p-10 -mt-0 sm:-mt-52">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-3 sm:p-10 -mt-0 sm:-mt-52 border border-[#E6E1CF]">
           <div className="flex justify-center">
             <Image
-              src="/Logo Gs Store.png"
+              src="/logo-GS.png"
               alt="Logo GS Store"
               width={140}
               height={140}
