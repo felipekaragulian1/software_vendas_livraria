@@ -83,7 +83,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex((prev) => 
+      setSelectedIndex((prev) =>
         prev < results.length - 1 ? prev + 1 : prev
       );
     } else if (e.key === 'ArrowUp') {
@@ -129,35 +129,35 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
   // Case-insensitive e accent-insensitive - destaca independente de maiúsculas/minúsculas e acentos
   const highlightText = (text: string, search: string) => {
     if (!search.trim()) return text;
-    
+
     const normalizedText = normalizeText(text);
     const normalizedSearch = normalizeText(search);
-    
+
     // Encontrar todas as ocorrências no texto normalizado
     const matches: Array<{ start: number; end: number }> = [];
     let startIndex = 0;
-    
+
     while ((startIndex = normalizedText.indexOf(normalizedSearch, startIndex)) !== -1) {
       const endIndex = startIndex + normalizedSearch.length;
       matches.push({ start: startIndex, end: endIndex });
       startIndex += normalizedSearch.length;
     }
-    
+
     if (matches.length === 0) return text;
-    
+
     // Construir array de partes (texto normal + destacado)
     // Como a normalização pode mudar o tamanho (ex: "ã" vira "a"), 
     // vamos usar uma abordagem mais simples: destacar baseado na posição aproximada
     const parts: Array<{ text: string; highlight: boolean }> = [];
     let lastIndex = 0;
-    
+
     // Para cada match, encontrar a posição aproximada no texto original
     matches.forEach((match) => {
       // Aproximação: usar os mesmos índices (pode não ser 100% preciso com acentos,
       // mas funciona na maioria dos casos e é mais simples)
       const originalStart = Math.min(match.start, text.length);
       const originalEnd = Math.min(match.end, text.length);
-      
+
       // Adicionar texto antes do match
       if (originalStart > lastIndex) {
         parts.push({
@@ -165,7 +165,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
           highlight: false,
         });
       }
-      
+
       // Adicionar texto do match (destacado)
       if (originalEnd > originalStart) {
         parts.push({
@@ -173,10 +173,10 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
           highlight: true,
         });
       }
-      
+
       lastIndex = originalEnd;
     });
-    
+
     // Adicionar texto restante
     if (lastIndex < text.length) {
       parts.push({
@@ -184,7 +184,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
         highlight: false,
       });
     }
-    
+
     return (
       <>
         {parts.map((part, index) =>
@@ -227,7 +227,20 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
             }, 200);
           }}
           placeholder="Digite o nome ou ID do produto (F2 para focar)"
-          className="w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="
+          w-full
+          px-4 py-3
+          text-base
+          border border-[#E6E1CF]
+          rounded-xl
+          bg-gray-50
+          text-[#1F1312]
+          placeholder:text-[#7A6F6A]
+          focus:border-[#f7f2e3]
+          focus:outline-none
+          focus:ring-2
+          focus:ring-[#f7f2e3]
+          transition"
           autoComplete="off"
           autoFocus
           aria-label="Buscar produto"
@@ -243,7 +256,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
       </div>
 
       {results.length > 0 && (
-        <div 
+        <div
           id="product-results"
           className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto"
           role="listbox"
@@ -262,9 +275,8 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
               }}
               role="option"
               aria-selected={index === selectedIndex}
-              className={`w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors ${
-                index === selectedIndex ? 'bg-blue-100 ring-2 ring-blue-300' : ''
-              } ${index !== results.length - 1 ? 'border-b border-gray-100' : ''}`}
+              className={`w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors ${index === selectedIndex ? 'bg-blue-100 ring-2 ring-blue-300' : ''
+                } ${index !== results.length - 1 ? 'border-b border-gray-100' : ''}`}
             >
               <div className="flex justify-between items-center">
                 <div className="flex-1">
@@ -293,7 +305,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
       )}
 
       {query && results.length === 0 && !isLoading && (
-        <div 
+        <div
           className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500"
           role="status"
           aria-live="polite"

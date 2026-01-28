@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-[#E6E1CF] flex flex-col">
+    <main className="min-h-screen bg-gradient-to-b from-[#E6E1CF] to-[#F2EFE6] flex flex-col">
 
       <motion.div
         initial={{ opacity: 0, y: -30 }}
