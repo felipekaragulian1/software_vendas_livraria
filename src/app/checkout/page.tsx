@@ -107,7 +107,7 @@ export default function CheckoutPage() {
 
           <button
             onClick={() => setSaleComplete(null)}
-            className="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 transition"
+            className="w-full py-3 bg-[#F5F3ED] text-[#1F1312] rounded-xl font-semibold hover:opacity-90 transition"
           >
             Nova Venda
           </button>
