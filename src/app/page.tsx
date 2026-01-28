@@ -24,6 +24,17 @@ export default function Home() {
 
       <section className="flex-1 flex items-center justify-center px-4 p-0 md:p-4">
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-3 sm:p-10 -mt-0 sm:-mt-52">
+          <div className="flex justify-center">
+            <Image
+              src="/Logo Gs Store.png"
+              alt="Logo GS Store"
+              width={140}
+              height={140}
+              className="object-contain"
+            />
+          </div>
+
+
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-semibold text-[#1F1312] mb-3">
               Sistema de Gerenciamento de Vendas
@@ -36,7 +47,6 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-
             <button
               onClick={() => router.push('/checkout')}
               className="
@@ -74,7 +84,6 @@ export default function Home() {
                 <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-gray-600 group-hover:text-[#1f0000]" />
                 Relatórios
               </h2>
-
 
               <p className="text-gray-500 text-sm sm:text-base group-hover:text-[#1f0000]/60">
                 Visualizar relatórios de vendas
