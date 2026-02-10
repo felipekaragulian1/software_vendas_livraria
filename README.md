@@ -71,6 +71,8 @@ CREATE TABLE Produtos (
 );
 ```
 
+**Coluna Ativo (inativar itens):** Para usar a tela de estoque com inativar/editar preço e estoque, execute uma vez o script `scripts/sql/add_ativo_produtos.sql` no banco. Ele adiciona a coluna `Ativo BIT NOT NULL DEFAULT 1` na tabela `Produtos`.
+
 #### Pedidos
 A estrutura da tabela `Pedidos` é descoberta automaticamente via `INFORMATION_SCHEMA`. O sistema assume:
 - `Id` (IDENTITY PRIMARY KEY)

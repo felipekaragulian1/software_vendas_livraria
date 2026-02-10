@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, ShoppingCart } from 'lucide-react';
+import { BarChart3, ShoppingCart, Package } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -71,7 +71,7 @@ export default function Home() {
                 transition: { staggerChildren: 0.15 },
               },
             }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6"
           >
             <motion.button
               variants={{
@@ -118,6 +118,30 @@ export default function Home() {
 
               <p className="text-gray-500 text-sm sm:text-base group-hover:text-[#1f0000]/60">
                 Visualizar relatórios de vendas
+              </p>
+            </motion.button>
+
+            <motion.button
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              onClick={() => router.push('/estoque')}
+              className="
+                group bg-white hover:bg-[#F2F1E6] rounded-2xl shadow-md
+                hover:shadow-2xl transition-all duration-300
+                p-8 sm:p-10 flex flex-col items-center text-center
+                hover:scale-[1.03]
+              "
+            >
+              <h2 className="flex items-center gap-2 text-xl sm:text-2xl font-semibold text-gray-900 group-hover:text-[#1f0000] mb-2">
+                <Package className="w-6 h-6 text-gray-600 group-hover:text-[#1f0000]" />
+                Estoque
+              </h2>
+
+              <p className="text-gray-500 text-sm sm:text-base group-hover:text-[#1f0000]/60">
+                Cadastrar SKU ou adicionar quantidade
               </p>
             </motion.button>
           </motion.div>

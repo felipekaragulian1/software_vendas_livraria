@@ -6,9 +6,11 @@ import { Product } from '@/lib/api';
 interface SearchBoxProps {
   onSelectProduct: (product: Product) => void;
   onFocus?: () => void;
+  placeholder?: string;
+  autoFocus?: boolean;
 }
 
-export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) {
+export default function SearchBox({ onSelectProduct, onFocus, placeholder, autoFocus = true }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -16,7 +18,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
 
-  // Autofocus e suporte a F2
+  // Autofocus (opcional) e suporte a F2
   useEffect(() => {
     const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       if (e.key === 'F2') {
@@ -26,12 +28,12 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    inputRef.current?.focus();
+    if (autoFocus) inputRef.current?.focus();
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [autoFocus]);
 
   // Busca com debounce (autocomplete)
   useEffect(() => {
@@ -226,7 +228,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
               }
             }, 200);
           }}
-          placeholder="Digite o nome ou ID do produto (F2 para focar)"
+          placeholder={placeholder ?? 'Digite o nome ou ID do produto (F2 para focar)'}
           className="
           w-full
           px-4 py-3
@@ -242,7 +244,7 @@ export default function SearchBox({ onSelectProduct, onFocus }: SearchBoxProps) 
           focus:ring-[#f7f2e3]
           transition"
           autoComplete="off"
-          autoFocus
+          autoFocus={autoFocus}
           aria-label="Buscar produto"
           aria-autocomplete="list"
           aria-expanded={results.length > 0}

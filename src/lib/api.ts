@@ -3,6 +3,7 @@ export interface Product {
   nome: string;
   preco: number;
   estoque: number;
+  ativo?: boolean;
 }
 
 export interface CartItem {
@@ -160,5 +161,104 @@ export async function checkHealth(): Promise<boolean> {
     return response.ok;
   } catch (error) {
     return false;
+  }
+}
+
+/** Payload para cadastrar novo produto */
+export interface CreateProductPayload {
+  nome: string;
+  preco: number;
+  estoque: number;
+}
+
+/**
+ * Cadastra um novo produto (SKU)
+ */
+export async function createProduct(payload: CreateProductPayload): Promise<Product> {
+  try {
+    const response = await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.error || 'Erro ao cadastrar produto');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao cadastrar produto:', error);
+    throw error;
+  }
+}
+
+/**
+ * Adiciona quantidade ao estoque de um produto
+ */
+export async function addStock(productId: number, quantidade: number): Promise<Product> {
+  try {
+    const response = await fetch(`/api/products/${productId}/stock`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantidade }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.error || 'Erro ao atualizar estoque');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao atualizar estoque:', error);
+    throw error;
+  }
+}
+
+/**
+ * Lista produtos (para tela de estoque; opcional limit)
+ */
+export async function fetchProductsList(limit?: number): Promise<Product[]> {
+  const url = limit
+    ? `/api/products?limit=${limit}`
+    : '/api/products';
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Erro ao listar produtos');
+  const data = await response.json();
+  return data.products || [];
+}
+
+/** Payload para atualizar produto (todos opcionais) */
+export interface UpdateProductPayload {
+  preco?: number;
+  estoque?: number;
+  ativo?: boolean;
+}
+
+/**
+ * Atualiza produto (preço, estoque e/ou ativo)
+ */
+export async function updateProduct(
+  productId: number,
+  payload: UpdateProductPayload
+): Promise<Product> {
+  try {
+    const response = await fetch(`/api/products/${productId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || errorData.error || 'Erro ao atualizar produto');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Erro ao atualizar produto:', error);
+    throw error;
   }
 }
